@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { cache } from 'react';
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -7,6 +6,7 @@ let cached = (global as any).mongoose || {conn: null, promise: null};
 
 export const connectToDatabase = async () => {
     if (cached.conn) {
+        console.log("connected to existing database" + cached.conn)
         return cached.conn;
     }
 
