@@ -2,7 +2,7 @@ import { Document, Schema, model, models } from 'mongoose'
 
 export interface IEvent extends Document {
     _id: string;
-    clerkId: string;
+    title: string;
     description?: string;
     location?: string;
     createdAt: Date;
@@ -17,7 +17,7 @@ export interface IEvent extends Document {
 }
 
 const EventSchema = new Schema({
-    clerkId: { type: String, required: true },
+    title: { type: String, required: true },
     description: { type: String },
     location: { type: String },
     createdAt: { type: Date, default: Date.now },

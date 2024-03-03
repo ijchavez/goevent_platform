@@ -91,3 +91,7 @@ export const handleError = (error: unknown) => {
   console.error(error)
   throw new Error(typeof error === 'string' ? error : JSON.stringify(error))
 }
+
+export const transformPriceForStripe = (amount: string): number => {
+  return Number((Number(amount) * 100).toFixed(2));
+}

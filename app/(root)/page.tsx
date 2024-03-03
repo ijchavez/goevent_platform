@@ -1,8 +1,18 @@
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import Link from "next/link";
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable react/react-in-jsx-scope */
+import Collection from '@/components/shared/Collection'
+import { Button } from '@/components/ui/button'
+import { getAllEvents } from '@/lib/actions/event.actions'
+import Image from 'next/image'
+import Link from 'next/link'
 
-export default function Home() {
+export default async function Home () {
+  const events = await getAllEvents({
+    query: '',
+    category: '',
+    page: 1,
+    limit: 6
+  })
   return (
     <>
       <section className="bg-primary-50 bf-dotted-pattern bg-contain py-5 md:pd-10">
@@ -12,11 +22,11 @@ export default function Home() {
             <p className="p-regular-20 md:p-regular-24">Book and learn helpful tips from 3,168+ mentors in world-class companies with our global community.</p>
             <Button size="lg" asChild className="button w-full sm:w-fit">
               <Link href="#events">Explore Now</Link>
-            
+
             </Button>
-          
+
           </div>
-          <Image 
+          <Image
             src="/assets/images/hero.png"
             alt="hero"
             width={1000}
@@ -32,10 +42,18 @@ export default function Home() {
         <div className="flex w-full flex-col gap-5 md:flex-row">
           Search
           CategoryFilter
+          <Collection 
+            data={events?.data}
+            emptyTitle="No Events Found"
+            emptyStateSubtext="Come back later"
+            collectionType="All_Events"
+            limit={6}
+            page={1}
+            totalPages={2}
+          />
         </div>
       </section>
     </>
 
-  );
-
+  )
 }
