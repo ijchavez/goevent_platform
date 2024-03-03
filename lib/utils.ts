@@ -4,6 +4,7 @@ import { twMerge } from 'tailwind-merge'
 import qs from 'query-string'
 
 import { UrlQueryParams, RemoveUrlQueryParams } from '@/types'
+import * as QRCode from 'qrcode'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -94,4 +95,13 @@ export const handleError = (error: unknown) => {
 
 export const transformPriceForStripe = (amount: string): number => {
   return Number((Number(amount) * 100).toFixed(2));
+}
+export const generateQRCode = async (text: string): Promise<string> => {
+  try {
+    const url = await QRCode.toDataURL(text);
+    return url;
+  } catch (err) {
+    console.error(err);
+    return '';
+  }
 }

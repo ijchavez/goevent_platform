@@ -29,21 +29,21 @@ const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) 
 
             <div className="flex w-full flex-col gap-8 p-5 md:p-10">
                 <div className="flex flex-col gap-6">
-                    <h2 className='h2-bold'>{event.title}</h2>
+                    <h2 className='h2-bold' id='event-title'>{event.title}</h2>
 
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                     <div className="flex gap-3">
-                        <p className="p-bold-20 rounded-full bg-green-500/10 px-5 py-2 text-green-700">
+                        <p className="p-bold-20 rounded-full bg-green-500/10 px-5 py-2 text-green-700" id='price'>
                             {event.isFree ? 'FREE' : `$${event.price}`}
                         </p>
-                        <p className="p-medium-16 rounded-full bg-grey-500/10 px-4 py-2.5 text-grey-500">
+                        <p className="p-medium-16 rounded-full bg-grey-500/10 px-4 py-2.5 text-grey-500" id ='category'>
                             {event.category.name}
                         </p>
                     </div>
 
                     <p className="p-medium-18 ml-2 mt-2 sm:mt-0">
                         by{' '}
-                        <span className="text-primary-500">{event.organizer.firstName} {event.organizer.lastName}</span>
+                        <span className="text-primary-500" id='event-organizer'>{event.organizer.firstName} {event.organizer.lastName}</span>
                     </p>
                 </div>
             </div>
@@ -73,8 +73,8 @@ const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) 
 
                 <div className="flex flex-col gap-2">
                     <p className="p-bold-20 text-grey-600">What You'll Learn:</p>
-                    <p className="p-medium-16 lg:p-regular-18">{event.description}</p>
-                    <p className="p-medium-16 lg:p-regular-18 truncate text-primary-500 underline">{event.url}</p>
+                    <p className="p-medium-16 lg:p-regular-18" id='description'>{event.description}</p>
+                    <p className="p-medium-16 lg:p-regular-18 truncate text-primary-500 underline" id='event-url'>{event.url}</p>
                 </div>
             </div>
         </div>
