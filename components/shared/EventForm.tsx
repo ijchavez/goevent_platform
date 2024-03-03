@@ -277,6 +277,9 @@ const EventForm = ({ userId, type, event, eventId } : EventFormProps) => {
                                   onCheckedChange={(isChecked) => {
                                     field.onChange(isChecked);
                                     if (isChecked) {
+                                      form.setValue('price', '0');
+                                    }
+                                    if (!isChecked) {
                                       form.setValue('price', '');
                                     }
                                   }}

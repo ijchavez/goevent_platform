@@ -12,11 +12,17 @@ export const eventFormSchema = z.object({
     }).max(400, {
         message: "Title must be less than 400 characters.",
     }),
-    imageUrl: z.string(),
+    imageUrl: z.string().min(1 , {
+        message: "Image URL is required.",
+      }),
     startDateTime: z.date(),
     endDateTime: z.date(),
-    categoryId: z.string(),
-    price: z.string(),
+    categoryId: z.string().refine(value => value !== '', {
+        message: "Category is required",
+    }),
+    price: z.string().min(1 , {
+        message: "Price is required.",
+      }),
     isFree: z.boolean(),
     url: z.string().url()
   })
