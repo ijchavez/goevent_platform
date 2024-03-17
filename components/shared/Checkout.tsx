@@ -18,6 +18,7 @@ const Checkout = ({ event, userId }: { event: IEvent, userId: string }) => {
       console.log('Order canceled -- continue to shop around and checkout when you’re ready.');
     }
   }, []);
+  const isEventCreator = event.organizer._id === userId;
   const onCheckout = async () => {
     const order = {
         eventTitle: event.title,
@@ -30,11 +31,17 @@ const Checkout = ({ event, userId }: { event: IEvent, userId: string }) => {
   }
   return (
     <form action={onCheckout} method="post">
-      <Button type="submit" role="link" size="lg" className="button sm:w-fit">
-        {event.isFree ? 'Get Ticket' : 'Buy Ticket'}
+      <Button
+        type="submit"
+        role="link"
+        size="lg"
+        className="button sm:w-fit"
+        disabled={isEventCreator} // Disable the button if the user is the event creator
+      >
+        {isEventCreator ? 'Not available' : (event.isFree ? 'Get Ticket' : 'Buy Ticket')}
       </Button>
     </form>
-  )
+  );
 }
 
 export default Checkout
