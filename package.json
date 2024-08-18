@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "dev:server": "npx tsx index.ts",
-    "dev": "concurrently \"npx tsx index.ts\" \"next dev\""
+    "dev": "concurrently \"npx tsx index.ts\" \"next dev\"",
+    "build:server": "tsc",
+    "start:server": "node dist/index.js"
   },
   "dependencies": {
     "@clerk/clerk-sdk-node": "^5.0.26",
