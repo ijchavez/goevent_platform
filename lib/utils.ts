@@ -33,11 +33,20 @@ export const formatDateTime = (dateString: Date) => {
     hour12: true, // use 12-hour clock (true) or 24-hour clock (false)
   }
 
-  const formattedDateTime: string = new Date(dateString).toLocaleString('en-US', dateTimeOptions)
+  const formattedDateTime: string = new Date(dateString).toLocaleString(
+    'en-US',
+    dateTimeOptions,
+  )
 
-  const formattedDate: string = new Date(dateString).toLocaleString('en-US', dateOptions)
+  const formattedDate: string = new Date(dateString).toLocaleString(
+    'en-US',
+    dateOptions,
+  )
 
-  const formattedTime: string = new Date(dateString).toLocaleString('en-US', timeOptions)
+  const formattedTime: string = new Date(dateString).toLocaleString(
+    'en-US',
+    timeOptions,
+  )
 
   return {
     dateTime: formattedDateTime,
@@ -68,14 +77,17 @@ export function formUrlQuery({ params, key, value }: UrlQueryParams) {
       url: window.location.pathname,
       query: currentUrl,
     },
-    { skipNull: true }
+    { skipNull: true },
   )
 }
 
-export function removeKeysFromQuery({ params, keysToRemove }: RemoveUrlQueryParams) {
+export function removeKeysFromQuery({
+  params,
+  keysToRemove,
+}: RemoveUrlQueryParams) {
   const currentUrl = qs.parse(params)
 
-  keysToRemove.forEach(key => {
+  keysToRemove.forEach((key) => {
     delete currentUrl[key]
   })
 
@@ -84,7 +96,7 @@ export function removeKeysFromQuery({ params, keysToRemove }: RemoveUrlQueryPara
       url: window.location.pathname,
       query: currentUrl,
     },
-    { skipNull: true }
+    { skipNull: true },
   )
 }
 
@@ -94,14 +106,20 @@ export const handleError = (error: unknown) => {
 }
 
 export const transformPriceForStripe = (amount: string): number => {
-  return Number((Number(amount) * 100).toFixed(2));
+  return Number((Number(amount) * 100).toFixed(2))
 }
 export const generateQRCode = async (text: string): Promise<string> => {
   try {
-    const url = await QRCode.toDataURL(text);
-    return url;
+    const url = await QRCode.toDataURL(text)
+    return url
   } catch (err) {
-    console.error(err);
-    return '';
+    console.error(err)
+    return ''
   }
+}
+
+export function extractStripeIdFromError(error: any): string | null {
+  const errorMessage = error.message || ''
+  const stripeIdMatch = errorMessage.match(/cs_test_\w+/)
+  return stripeIdMatch ? stripeIdMatch[0] : null
 }
