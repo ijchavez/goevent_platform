@@ -23,7 +23,11 @@ const getCategoryByName = async (name: string) => {
 
 const populateEvent = (query: any) => {
   return query
-    .populate({ path: 'organizer', model: User, select: '_id firstName lastName' })
+    .populate({
+      path: 'organizer',
+      model: User,
+      select: '_id firstName lastName',
+    })
     .populate({ path: 'category', model: Category, select: '_id name' })
 }
 
@@ -35,8 +39,14 @@ export async function createEvent({ userId, event, path }: CreateEventParams) {
     const organizer = await User.findById(userId)
     if (!organizer) throw new Error('Organizer not found')
 
-    const newEvent = await Event.create({ ...event, category: event.categoryId, organizer: userId })
-    revalidatePath(path)
+    const newEvent = await Event.create({
+      ...event,
+      category: event.categoryId,
+      organizer: userId,
+    })
+    if (typeof revalidatePath === 'function' && path) {
+      revalidatePath(path)
+    }
 
     return JSON.parse(JSON.stringify(newEvent))
   } catch (error) {
@@ -51,30 +61,69 @@ export async function getEventById(eventId: string) {
 
     const event = await populateEvent(Event.findById(eventId))
 
-    if (!event) throw new Error('Event not found')
+    if (!event) {
+      const error = new Error('Event not found')
+      error.name = 'NotFoundError'
+      throw error
+    }
 
     return JSON.parse(JSON.stringify(event))
   } catch (error) {
-    handleError(error)
+    // Verificamos que el error sea un Error de JavaScript
+    if (error instanceof Error) {
+      if (error.name === 'NotFoundError') {
+        if (typeof window === 'undefined') {
+          // Estamos en el backend
+          return null
+        } else {
+          // Estamos en el frontend
+          alert('Event not found')
+        }
+      } else {
+        handleError(error)
+      }
+    } else {
+      console.error('Unknown error', error)
+    }
   }
 }
 
 // UPDATE
-export async function updateEvent({ userId, event, path }: UpdateEventParams) {
+export async function updateEvent({
+  userId,
+  event,
+  eventId,
+  path,
+}: {
+  userId: string
+  event: any
+  eventId: string
+  path?: string
+}) {
   try {
     await connectToDatabase()
 
-    const eventToUpdate = await Event.findById(event._id)
+    let eventToUpdate
+    const filter = path ? event._id : eventId
+
+    eventToUpdate = await Event.findById(filter)
+
+    // Verifica si el evento existe y si el usuario es el organizador
     if (!eventToUpdate || eventToUpdate.organizer.toHexString() !== userId) {
       throw new Error('Unauthorized or event not found')
     }
 
+    // Actualiza el evento
     const updatedEvent = await Event.findByIdAndUpdate(
-      event._id,
+      filter,
       { ...event, category: event.categoryId },
-      { new: true }
+      { new: true },
     )
-    revalidatePath(path)
+
+    // Revalida la ruta si es necesario
+    if (typeof revalidatePath === 'function' && path) {
+      revalidatePath(path)
+    }
 
     return JSON.parse(JSON.stringify(updatedEvent))
   } catch (error) {
@@ -88,21 +137,35 @@ export async function deleteEvent({ eventId, path }: DeleteEventParams) {
     await connectToDatabase()
 
     const deletedEvent = await Event.findByIdAndDelete(eventId)
-    if (deletedEvent) revalidatePath(path)
+    if (typeof revalidatePath === 'function' && path) {
+      if (deletedEvent) revalidatePath(path)
+    }
   } catch (error) {
     handleError(error)
   }
 }
 
 // GET ALL EVENTS
-export async function getAllEvents({ query, limit = 6, page, category }: GetAllEventsParams) {
+export async function getAllEvents({
+  query,
+  limit = 6,
+  page,
+  category,
+}: GetAllEventsParams) {
   try {
     await connectToDatabase()
 
-    const titleCondition = query ? { title: { $regex: query, $options: 'i' } } : {}
-    const categoryCondition = category ? await getCategoryByName(category) : null
+    const titleCondition = query
+      ? { title: { $regex: query, $options: 'i' } }
+      : {}
+    const categoryCondition = category
+      ? await getCategoryByName(category)
+      : null
     const conditions = {
-      $and: [titleCondition, categoryCondition ? { category: categoryCondition._id } : {}],
+      $and: [
+        titleCondition,
+        categoryCondition ? { category: categoryCondition._id } : {},
+      ],
     }
 
     const skipAmount = (Number(page) - 1) * limit
@@ -124,7 +187,11 @@ export async function getAllEvents({ query, limit = 6, page, category }: GetAllE
 }
 
 // GET EVENTS BY ORGANIZER
-export async function getEventsByUser({ userId, limit = 6, page }: GetEventsByUserParams) {
+export async function getEventsByUser({
+  userId,
+  limit = 6,
+  page,
+}: GetEventsByUserParams) {
   try {
     await connectToDatabase()
 
@@ -139,7 +206,10 @@ export async function getEventsByUser({ userId, limit = 6, page }: GetEventsByUs
     const events = await populateEvent(eventsQuery)
     const eventsCount = await Event.countDocuments(conditions)
 
-    return { data: JSON.parse(JSON.stringify(events)), totalPages: Math.ceil(eventsCount / limit) }
+    return {
+      data: JSON.parse(JSON.stringify(events)),
+      totalPages: Math.ceil(eventsCount / limit),
+    }
   } catch (error) {
     handleError(error)
   }
@@ -156,7 +226,9 @@ export async function getRelatedEventsByCategory({
     await connectToDatabase()
 
     const skipAmount = (Number(page) - 1) * limit
-    const conditions = { $and: [{ category: categoryId }, { _id: { $ne: eventId } }] }
+    const conditions = {
+      $and: [{ category: categoryId }, { _id: { $ne: eventId } }],
+    }
 
     const eventsQuery = Event.find(conditions)
       .sort({ createdAt: 'desc' })
@@ -166,7 +238,10 @@ export async function getRelatedEventsByCategory({
     const events = await populateEvent(eventsQuery)
     const eventsCount = await Event.countDocuments(conditions)
 
-    return { data: JSON.parse(JSON.stringify(events)), totalPages: Math.ceil(eventsCount / limit) }
+    return {
+      data: JSON.parse(JSON.stringify(events)),
+      totalPages: Math.ceil(eventsCount / limit),
+    }
   } catch (error) {
     handleError(error)
   }

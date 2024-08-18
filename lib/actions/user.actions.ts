@@ -4,7 +4,6 @@ import { revalidatePath } from 'next/cache'
 
 import { connectToDatabase } from '@/lib/database'
 import User from '@/lib/database/models/user.model'
-//import Order from '@/lib/database/models/order.model'
 import Event from '@/lib/database/models/event.model'
 import { handleError } from '@/lib/utils'
 
@@ -34,11 +33,25 @@ export async function getUserById(userId: string) {
   }
 }
 
+export const getUserByClerkId = async (clerkId: string) => {
+  try {
+    const user = await User.findOne({ clerkId }) // Buscar por clerkId en lugar de _id
+    if (!user) {
+      return JSON.parse(JSON.stringify(user))
+    }
+    return user
+  } catch (error) {
+    handleError(error)
+  }
+}
+
 export async function updateUser(clerkId: string, user: UpdateUserParams) {
   try {
     await connectToDatabase()
 
-    const updatedUser = await User.findOneAndUpdate({ clerkId }, user, { new: true })
+    const updatedUser = await User.findOneAndUpdate({ clerkId }, user, {
+      new: true,
+    })
 
     if (!updatedUser) throw new Error('User update failed')
     return JSON.parse(JSON.stringify(updatedUser))
@@ -63,7 +76,7 @@ export async function deleteUser(clerkId: string) {
       // Update the 'events' collection to remove references to the user
       Event.updateMany(
         { _id: { $in: userToDelete.events } },
-        { $pull: { organizer: userToDelete._id } }
+        { $pull: { organizer: userToDelete._id } },
       ),
 
       // Update the 'orders' collection to remove references to the user
